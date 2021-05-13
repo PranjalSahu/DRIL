@@ -3,7 +3,7 @@
 **denoise_projection-script-only.py**
 ___________________________________
 For performing the denoising of dicom projections.<br>
-Takes as arugment the folder of input projections (--input) and the path to save the denoised projections (--output).<br>
+Takes as argument the folder of input projections (--input) and the path to save the denoised projections (--output).<br>
 Also takes the path of model weights (--weight).<br>
 <br>
 **Sample Usage:**<br>
