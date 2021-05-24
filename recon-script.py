@@ -1,11 +1,10 @@
 #!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
 
 # All Imports
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
+import argparse, sys
 import numpy as np
 import numba
 from numba import njit, prange
@@ -2068,33 +2067,40 @@ sub_b_size = BINSx*BINSy
 # Code for doing Sart recon in loop for all volumes
 
 
-#h_angles
+parser = argparse.ArgumentParser()
 
-proji = sys.argv[1]
-#for i in range(79, 0, -1):
-#a = "/media/pranjal/newdrive1/REAL-DBT-PROJECTIONS/xiaoyu_data/LE-L-CC/"
-#a = "/media/pranjal/newdrive1/REAL-DBT-PROJECTIONS/MASS/CE-27/LE-R-CC/"
-a = "/media/pranjal/BackupPlus/CIRS011A/QC-RAW_TOMO_20200124_021847_031000_CIRS011A/T_PR_RAW_R-CC_PHANTOM_0002_CIRS011A_0.97mGy/"
-#"/media/pranjal/BackupPlus/CIRS011A/QC-RAW_TOMO_20200124_021847_031000_CIRS011A/T_PR_RAW_R-CC_PHANTOM_0005_CIRS011A_0.97mGy/"
-#a = "/media/pranjal/BackupPlus/CIRS011A/QC-RAW_TOMO_20200124_021847_031000_CIRS011A/T_PR_RAW_R-CC_PHANTOM_0014_CIRS011A_5.26mGy/"
-projection_name = a.split("/")[-3]+"-"+a.split("/")[-2]
+parser.add_argument('--input',       help='Path of Input Projections')
+parser.add_argument('--orientation', help='Left/Right Breast')
+parser.add_argument('--output',      help='Path of Output Volume')
+parser.add_argument('--name',        help='Name of Output Volume')
+parser.add_argument('--prior',       help='Type of Prior')
+parser.add_argument('--beta',        help='Beta')
+parser.add_argument('--delta',       help='Delta')
+parser.add_argument('--lambdavalue',       help='Lambda')
 
-if 'HE' in projection_name:
-    exit(0)
+args = parser.parse_args()
 
-if a.split("/")[-2].split("-")[1] == "R":
-    breast_type = "right"
-else:
-    breast_type = "left"
+name             = args.name  
+projpath         = args.input
+outputpath       = args.output
+prior_type       = args.prior
+breast_type      = args.orientation
+beta             = args.beta
+delta            = args.delta
+lambda_parameter = float(args.lambdavalue)
 
-breast_type     = "right"
-projection_name = "rebuttal1"
-print(projection_name, breast_type, proji)
+beta_array = [float(x) for x in beta.split(",")]
+beta_array = -1*np.around(beta_array, decimals=3)
+print("BETA array: ", beta_array)
 
-host_prj_allangle_backup, h_angles   = load_prj_ima_all(breast_type, a)
-#host_prj_allangle_backup, h_angles   = load_prj_raw("left", 'lesion')
+delta_array = [float(x) for x in delta.split(",")]
+print("DELTA array: ", delta_array)
 
-#host_prj_allangle_backup, h_angles   = load_prj_duke("left", 1, 1)
+print("Lambda Value: ", lambda_parameter)
+print("Prior: ",        prior_type)
+
+# Read the Projections
+host_prj_allangle_backup, h_angles   = load_prj_ima_all(breast_type, projpath)
 
 h_angles = list(h_angles)
 
@@ -2126,19 +2132,9 @@ for i in range(0, subset_num):
 
 sub_b_size     = ANGLES_per_sub*b_size
 
-delta_array      = [0.0005]#[0.0001, 0.0002, 0.0003, 0.0005, 0.0006, 0.0007, 0.001]
-beta_array       = [0]#[0.1, 0.15, 0.20, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
-#beta_array.append(0)
 
-np.random.seed(int(proji)*200)
-for i in range(8):
-    beta_array.append(np.random.uniform(0.1, 0.5))
-beta_array       = -1*np.around(beta_array, decimals=3)
-print("BETA array")
-print(beta_array)
 
-#0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0]#[-0.7, -0.5, -0.3, -0.1, 0]
-lambda_parameter = 0.9
+
 
 import time
 start_time = time.time()
@@ -2196,8 +2192,6 @@ for delta in delta_array:
                 h_normprj_sub    = d_normprj_sub.copy_to_host()
                 h_prj_est_sub    = d_prj_est_sub.copy_to_host()
 
-                #h_normprj_sub[h_normprj_sub  < 0.5] = 10000
-
                 result_diff = SART_prj_diff(h_diff_line_sub,
                     host_prj_sub,
                     h_prj_est_sub,
@@ -2205,10 +2199,6 @@ for delta in delta_array:
                     h_index,
                     angleStart,
                     angleEnd)
-
-                #result_diff[result_diff > 0.5] = 0
-                #result_diff[result_diff > 100] = 0
-                #result_diff = np.nan_to_num(np.divide(host_prj_sub - h_prj_est_sub, h_normprj_sub))
 
                 d_diff_line_sub = cuda.to_device(result_diff)
 
@@ -2230,12 +2220,6 @@ for delta in delta_array:
 
         host_est = d_est.copy_to_host()
         #np.save('/media/dril/My Passport/REAL-DBT-PROJECTIONS/RECONS/'+projection_name+'_'+str(IMGSIZx)+'x'+str(IMGSIZy)+'x'+str(IMGSIZz)+'.'+str(i)+'_'+str(delta)+'_'+str(beta)+'_'+str(proji)+'.raw', host_est.astype('float16'))
-        host_est.astype('float32').tofile('/media/pranjal/newdrive1/IPMI_recons/'+projection_name+'_'+str(IMGSIZx)+'x'+str(IMGSIZy)+'x'+str(IMGSIZz)+'.'+str(i)+'_'+str(delta)+'_'+str(beta)+'_'+str(proji)+'_'+str(i)+'.raw')
+        host_est.astype('float32').tofile(outputpath+name+'_'+str(IMGSIZx)+'x'+str(IMGSIZy)+'x'+str(IMGSIZz)+'.'+str(i)+'_'+str(delta)+'_'+str(beta)+'_'+str(i)+'.raw')
 end_time = time.time()
 print('Total time is ', end_time-start_time)
-
-# In[ ]:
-
-
-
-
