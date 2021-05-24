@@ -365,6 +365,9 @@ def test_on_whole_proj_200(lowfilename, model):
     rowst = limg.shape[0]
     colst = limg.shape[1]
     
+    halfvalue    = int(imgshape/2) # replacement size
+    quartervalue = int(imgshape/4) # stride size 
+    
     # For top row
     i = 0
     j = 0
@@ -383,7 +386,8 @@ def test_on_whole_proj_200(lowfilename, model):
         cleanimg    = cleanimg - (after_mean-before_mean)
         
         cleanimage[i:i+imgshape, j:j+imgshape] = (cleanimg[0, :, :, 0]+0.5)*1250
-        j = j+imgshape
+        #j = j+imgshape
+        j = j+quartervalue
     
     
     # For bottom row
@@ -403,7 +407,8 @@ def test_on_whole_proj_200(lowfilename, model):
         cleanimg    = cleanimg - (after_mean-before_mean)
         
         cleanimage[i:i+imgshape, j:j+imgshape] = (cleanimg[0, :, :, 0]+0.5)*1250
-        j = j+imgshape
+        #j = j+imgshape
+        j = j+quartervalue
     
     # For rightmost column
     j = colst-imgshape
@@ -422,7 +427,7 @@ def test_on_whole_proj_200(lowfilename, model):
         cleanimg    = cleanimg - (after_mean-before_mean)
         
         cleanimage[i:i+imgshape, j:j+imgshape] = (cleanimg[0, :, :, 0]+0.5)*1250
-        i = i+imgshape
+        i = i+quartervalue
     
     # For leftmost column
     j = 0
@@ -440,11 +445,11 @@ def test_on_whole_proj_200(lowfilename, model):
         #cleanimg    = cleanimg + before_mean
         cleanimg    = cleanimg - (after_mean-before_mean)
         
+        #cleanimage[i+quartervalue:i+quartervalue+halfvalue, j+quartervalue:j+quartervalue+halfvalue] = (cleanimg[0, :, :, 0]+0.5)[quartervalue:quartervalue+halfvalue, quartervalue:quartervalue+halfvalue]*1250
         cleanimage[i:i+imgshape, j:j+imgshape] = (cleanimg[0, :, :, 0]+0.5)*1250
-        i = i+imgshape
+        i = i+quartervalue
     
-    halfvalue    = int(imgshape/2) # replacement size
-    quartervalue = int(imgshape/4) # stride size 
+    
     
     # indexes for deciding the patch location
     i = 0 
