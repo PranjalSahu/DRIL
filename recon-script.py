@@ -1725,6 +1725,10 @@ def G_Huber_prior_sart(priorbuf, estbuf, delta, prior_type, nbatchIDx):
                 # Isotropic Quadratic
                 elif prior_type == 1:
                     priorbuf[ind_voxel] = priorbuf[ind_voxel] + (1.0/distance)*diff
+                # Anisotropic Quadratic
+                elif prior_type == 2:
+                    weight_factor       = math.exp(-(diff/delta)*(diff/delta))
+                    priorbuf[ind_voxel] = priorbuf[ind_voxel] + diff*weight_factor/distance
     return    
 
 def prior_GPU_SART(d_prior, d_est, delta, prior_type):
@@ -2022,17 +2026,19 @@ beta             = args.beta
 delta            = args.delta
 lambda_parameter = float(args.lambdavalue)
 
-beta_array = [float(x) for x in beta.split(",")]
-beta_array = -1*np.around(beta_array, decimals=3)
+beta_array  = [float(x) for x in beta.split(",")]
+beta_array  = -1*np.around(beta_array, decimals=3)
 delta_array = [float(x) for x in delta.split(",")]
 
 
 # Assigning the Prior type
-if prior.lower() == 'huber':
+if prior.lower() ==   'huber':
     prior_type = 0
 elif prior.lower() == 'quadratic':
     prior_type = 1
-else:               # default is Huber
+elif prior.lower() == 'anisotropic_quadratic':
+    prior_type = 2
+else:                  # default is Huber
     prior_type = 0
 
 print("BETA array: ",   beta_array)
