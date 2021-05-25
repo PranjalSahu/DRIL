@@ -1793,22 +1793,25 @@ def load_prj_ima_all(breast_type, path):
     flag2  = 0
     prj_allangle  = np.zeros(BINSx*BINSy*ANGLES)
     
-    #print(BINSx*BINSy, ANGLES, prj_allangle.shape)
     x = []
     y = []
-    #path = path.replace('My Passport', 'ubuntudata2')
-    #path = path.replace('dril', 'drilnvm')
-    print('Projection Loading ', path)
-    #proj_paths = glob.glob("/media/dril/ubuntudata/DBT_recon_data/"+projection_name+"/CE*.IMA")
-    proj_paths = glob.glob(path+"*.IMA")
     
-    for p in proj_paths:
+    print('Projection Loading ', path)
+    proj_paths = glob.glob(path+"*.IMA")
+    count = 0
+    for i, p in enumerate(proj_paths):
         if '.0000.' in p:
             continue
-        print(p)
+        
         a    = pydicom.dcmread(p)
         temp = a.pixel_array.T
+        if np.max(temp) > 5000:
+            continue
+        
+        print(count, p)
         temp = np.log(10000)-np.log(temp)
+        count = count + 1
+        
         # Sharpening filter
         if(0):
             temp = unsharp_mask(temp, radius=3, amount=1, preserve_range=True)
@@ -1830,65 +1833,15 @@ def load_prj_ima_all(breast_type, path):
         y.append(float(a[0x00181530].value))
     y = np.array(y)*np.pi/180
     
-    print("length x ", len(x), " ", len(y))
     y, x = zip(*sorted(zip(y, x)))
     for j in range(len(x)):
-        #print("Proj ", j)
         flag2 = j
         for i in range(0, BINSx*BINSy):
             prj_allangle[flag2*BINSx*BINSy + i]  = x[j][i]
     
     return prj_allangle, y
 
-def load_prj_ima(breast_type):
-    b_size = BINSx*BINSy
-    flag2  = 0
-    prj_allangle  = np.zeros(BINSx*BINSy*ANGLES)
-    
-    print(BINSx*BINSy, ANGLES, prj_allangle.shape)
-    x = []
-    y = []
 
-    #proj_paths = glob.glob("/media/dril/ubuntudata/DBT_recon_data/"+projection_name+"/CE*.IMA")
-    proj_paths = glob.glob("/media/dril/ubuntudata/REAL-DBT-PROJECTIONS/MASS/CE-20/HE-R-CC/*.IMA")
-    
-    for p in proj_paths:
-        if '.0000.' in p:
-            continue
-        print(p)
-        a    = pydicom.dcmread(p)
-        temp = a.pixel_array.T
-        temp = np.log(10000)-np.log(temp)
-        # Sharpening filter
-        if(1):
-            #temp = unsharp_mask(temp, radius=3, amount=1, preserve_range=True)
-            thresh_min      = threshold_minimum(temp)
-            binary_adaptive = temp > thresh_min
-            temp = np.multiply(temp, binary_adaptive)
-            
-        if breast_type == "right":
-            temp = np.fliplr(temp)
-            temp = temp[-BINSy:]
-        else:
-            temp = temp[:BINSy]
-            temp = np.flipud(temp)
-        
-        temp = temp.flatten()
-        temp = x_y_flip(temp)
-        
-        x.append(temp)
-        y.append(float(a[0x00181530].value))
-    y = np.array(y)*np.pi/180
-    
-    print("length x ", len(x), " ", len(y))
-    y, x = zip(*sorted(zip(y, x)))
-    for j in range(len(x)):
-        #print("Proj ", j)
-        flag2 = j
-        for i in range(0, BINSx*BINSy):
-            prj_allangle[flag2*BINSx*BINSy + i]  = x[j][i]
-    
-    return prj_allangle, y
 
 def import_param():
     for i in range(ANGLES):
@@ -1968,12 +1921,11 @@ def load_prj_std(data_type):
     return prj_allangle
 
 
-# In[8]:
+
 
 
 # Settings Part for Real Data
 
-projection_name = "CE18"#"CE26.3584x1000."#"OSTR_LE.3584x1400."
 
 IMGSIZx = 3000
 IMGSIZy = 1200
@@ -1981,15 +1933,14 @@ IMGSIZz = 46
 f_size  = IMGSIZx*IMGSIZy*IMGSIZz
 
 BINSx   = 3584
-#BINSy   = 2816
 BINSy   = 1200
 
 Vsize_x = 0.085
 Vsize_y = 0.085
 Vsize_z = 1
 
-x_p0    = -IMGSIZx*0.5*Vsize_x #-127.5#-116.25
-y_p0    = -IMGSIZy*Vsize_y#+10     #-85#-115.1
+x_p0    = -IMGSIZx*0.5*Vsize_x
+y_p0    = -IMGSIZy*Vsize_y
 z_p0    = -30.0
 
 
@@ -1998,8 +1949,8 @@ Bsize_y = 0.085
 b_size  = BINSx*BINSy
 
 
-x_d0    = -BINSx*0.5*Bsize_x#-152.32
-y_d0    = -BINSy*Bsize_y#-136#-289.36
+x_d0    = -BINSx*0.5*Bsize_x
+y_d0    = -BINSy*Bsize_y
 
 
 
@@ -2011,11 +1962,6 @@ angles  = []
 detectorR = 47.0
 sourceR   = 608.5
 sourceY   = 0.0
-
-# Tuning Parameters
-beta  = 1000
-delta = 0.03
-#####################
 
 iter_num   = 5
 subset_num = 5
@@ -2043,28 +1989,11 @@ all_b_size = ANGLES*BINSx*BINSy
 sub_b_size = BINSx*BINSy
 
 
-# In[230]:
 
 
-# For storing the settings file
 
 
-# x_p0    = -116.25
-# y_p0    = -115.1
-# z_p0    = -30.0
-# x_d0    = -152.32
-# y_d0    = -137.7
 
-
-# h = ["/media/dril/My Passport/REAL-DBT-PROJECTIONS/MASS/AR-04/HE-R-MLO/", x_p0, y_p0, z_p0, x_d0, y_d0]
-
-# np.save("/media/dril/My Passport/REAL-DBT-PROJECTIONS/ALL-SETTINGS/settings-79.npy", h)
-
-
-# In[ ]:
-
-
-# Code for doing Sart recon in loop for all volumes
 
 
 parser = argparse.ArgumentParser()
@@ -2103,6 +2032,7 @@ print("Prior: ",        prior_type)
 host_prj_allangle_backup, h_angles   = load_prj_ima_all(breast_type, projpath)
 
 h_angles = list(h_angles)
+
 
 h_index   = np.array(list(range(0, 25)))
 
@@ -2162,10 +2092,8 @@ for delta in delta_array:
         d_diff_line_sub = cuda.device_array(int(sub_b_size))
         d_normprj_sub   = cuda.device_array(int(sub_b_size))
         d_prj_est_sub   = cuda.device_array(int(sub_b_size))
-        #d_prj_buf_sub   = cuda.device_array(int(sub_b_size))
 
         for i in range(0, 5):
-            #print("Iteration ", i)
             for a in range(0, 5):
                 angleStart = a*ANGLES_per_sub
                 angleEnd   = (a+1)*ANGLES_per_sub
@@ -2186,8 +2114,7 @@ for delta in delta_array:
                     d_index,
                     angleStart,
                     angleEnd)
-
-                #d_normprj_sub
+                
                 h_diff_line_sub  = d_diff_line_sub.copy_to_host()
                 h_normprj_sub    = d_normprj_sub.copy_to_host()
                 h_prj_est_sub    = d_prj_est_sub.copy_to_host()
