@@ -17,4 +17,4 @@ Takes as argument the folder of input projections (--input) and the path to save
 Other arguments are self explnatory.<br>
 <br>
 **Sample Usage:**<br>
-python recon-script.py --input=/media/drilnvm/ubuntudata2/REAL-DBT-PROJECTIONS/MASS/MC-20/LE-R-CC/ --output=/media/drilnvm/ubuntudata2/IMPI_recons/ --orientation=right --prior=huber --name=test1 --beta=0.15,0.251,0.35 --delta=0.0005 --lambdavalue=0.9
+python recon-script.py --input=/media/drilnvm/ubuntudata2/REAL-DBT-PROJECTIONS/MASS/MC-20/LE-R-CC/ --output=/media/drilnvm/ubuntudata2/IMPI_recons/ --orientation=left --prior=anisotropic_quadratic --name=test2 --beta=0.5,0.8 --delta=0.0006 --lambdavalue=0.9 --neighbours=1
