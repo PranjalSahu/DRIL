@@ -1684,7 +1684,7 @@ def G_Fessler_prior(RDD, RD, estbuf, delta, z_xy_ratio, nbatchIDx):
     return
 
 @cuda.jit
-def G_Huber_prior_sart(priorbuf, estbuf, delta, nbatchIDx):
+def G_Huber_prior_sart(priorbuf, estbuf, delta, prior_type, nbatchIDx):
     bx = cuda.blockIdx.x
     by = cuda.blockIdx.y
     
@@ -1718,12 +1718,16 @@ def G_Huber_prior_sart(priorbuf, estbuf, delta, nbatchIDx):
                     ind_nr = int(ind_nr_x + ind_nr_y*IMGSIZx + ind_nr_z*IMGSIZx*IMGSIZy)
                 
                 diff        = estbuf[ind_voxel]-estbuf[ind_nr]
-                denominator = math.sqrt(1.0+(diff/delta)*(diff/delta))
-                
-                priorbuf[ind_voxel] = priorbuf[ind_voxel] + (1.0/distance)*diff/denominator
+                # Huber 
+                if prior_type == 0:
+                    denominator = math.sqrt(1.0+(diff/delta)*(diff/delta))
+                    priorbuf[ind_voxel] = priorbuf[ind_voxel] + (1.0/distance)*diff/denominator
+                # Isotropic Quadratic
+                elif prior_type == 1:
+                    priorbuf[ind_voxel] = priorbuf[ind_voxel] + (1.0/distance)*diff
     return    
 
-def prior_GPU_SART(d_prior, d_est, delta):
+def prior_GPU_SART(d_prior, d_est, delta, prior_type):
     BACKPRJ_THREAD = BACKPRJ_ThreX, BACKPRJ_ThreY
     BACKPRJ_GRID   = BACKPRJ_GridX, BACKPRJ_GridY
     
@@ -1732,7 +1736,7 @@ def prior_GPU_SART(d_prior, d_est, delta):
         exit(1)
     
     for nbatchIDx in range(0, nBatchXdim):
-        G_Huber_prior_sart[BACKPRJ_GRID, BACKPRJ_THREAD](d_prior, d_est, delta, nbatchIDx)
+        G_Huber_prior_sart[BACKPRJ_GRID, BACKPRJ_THREAD](d_prior, d_est, delta, prior_type, nbatchIDx)
         # Check out the content of this kernel in file ConebeamCT_kernel.cu
         cuda.synchronize()
     return
@@ -2012,7 +2016,7 @@ args = parser.parse_args()
 name             = args.name  
 projpath         = args.input
 outputpath       = args.output
-prior_type       = args.prior
+prior            = args.prior
 breast_type      = args.orientation
 beta             = args.beta
 delta            = args.delta
@@ -2020,11 +2024,19 @@ lambda_parameter = float(args.lambdavalue)
 
 beta_array = [float(x) for x in beta.split(",")]
 beta_array = -1*np.around(beta_array, decimals=3)
-print("BETA array: ", beta_array)
-
 delta_array = [float(x) for x in delta.split(",")]
-print("DELTA array: ", delta_array)
 
+
+# Assigning the Prior type
+if prior.lower() == 'huber':
+    prior_type = 0
+elif prior.lower() == 'quadratic':
+    prior_type = 1
+else:               # default is Huber
+    prior_type = 0
+
+print("BETA array: ",   beta_array)
+print("DELTA array: ",  delta_array)
 print("Lambda Value: ", lambda_parameter)
 print("Prior: ",        prior_type)
 
@@ -2104,7 +2116,7 @@ for delta in delta_array:
                 d_prior       = np.zeros(f_size, np.float32)
                 d_prior       = cuda.to_device(d_prior)
 
-                prior_GPU_SART(d_prior, d_est, delta)
+                prior_GPU_SART(d_prior, d_est, delta, prior_type)
 
                 fprojectCB_1R_GPU_SART_cos(
                     d_est,
