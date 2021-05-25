@@ -1684,7 +1684,7 @@ def G_Fessler_prior(RDD, RD, estbuf, delta, z_xy_ratio, nbatchIDx):
     return
 
 @cuda.jit
-def G_Huber_prior_sart(priorbuf, estbuf, delta, prior_type, nbatchIDx):
+def G_Huber_prior_sart(priorbuf, estbuf, delta, prior_type, neighbours, nbatchIDx):
     bx = cuda.blockIdx.x
     by = cuda.blockIdx.y
     
@@ -1704,9 +1704,9 @@ def G_Huber_prior_sart(priorbuf, estbuf, delta, prior_type, nbatchIDx):
     ind_voxel = int((ind_z*IMGSIZy+ind_y)*IMGSIZx+ind_x)  #(if prj is scanner data, need x_y_flip)
     #ind_voxel=(ind_z*IMGSIZx+ind_x)*IMGSIZy+ind_y;
     
-    for ind_nr_z  in range(ind_z-1, ind_z+2):
-        for ind_nr_y in range(ind_y-1, ind_y+2):
-            for ind_nr_x in range(ind_x-1, ind_x+2):
+    for ind_nr_z  in range(ind_z-neighbours, ind_z+neighbours+1):
+        for ind_nr_y in range(ind_y-neighbours, ind_y+neighbours+1):
+            for ind_nr_x in range(ind_x-neighbours, ind_x+neighbours+1):
                 distance = math.sqrt(float((ind_nr_x-ind_x)*(ind_nr_x-ind_x)+(ind_nr_y-ind_y)*(ind_nr_y-ind_y)+(ind_nr_z-ind_z)*(ind_nr_z-ind_z)))
                 
                 if (distance == 0.0):
@@ -1731,7 +1731,7 @@ def G_Huber_prior_sart(priorbuf, estbuf, delta, prior_type, nbatchIDx):
                     priorbuf[ind_voxel] = priorbuf[ind_voxel] + diff*weight_factor/distance
     return    
 
-def prior_GPU_SART(d_prior, d_est, delta, prior_type):
+def prior_GPU_SART(d_prior, d_est, delta, prior_type, neighbours):
     BACKPRJ_THREAD = BACKPRJ_ThreX, BACKPRJ_ThreY
     BACKPRJ_GRID   = BACKPRJ_GridX, BACKPRJ_GridY
     
@@ -1740,7 +1740,7 @@ def prior_GPU_SART(d_prior, d_est, delta, prior_type):
         exit(1)
     
     for nbatchIDx in range(0, nBatchXdim):
-        G_Huber_prior_sart[BACKPRJ_GRID, BACKPRJ_THREAD](d_prior, d_est, delta, prior_type, nbatchIDx)
+        G_Huber_prior_sart[BACKPRJ_GRID, BACKPRJ_THREAD](d_prior, d_est, delta, prior_type, neighbours, nbatchIDx)
         # Check out the content of this kernel in file ConebeamCT_kernel.cu
         cuda.synchronize()
     return
@@ -2013,6 +2013,7 @@ parser.add_argument('--name',        help='Name of Output Volume')
 parser.add_argument('--prior',       help='Type of Prior')
 parser.add_argument('--beta',        help='Beta')
 parser.add_argument('--delta',       help='Delta')
+parser.add_argument('--neighbours',       help='Number of neighbours')
 parser.add_argument('--lambdavalue',       help='Lambda')
 
 args = parser.parse_args()
@@ -2024,6 +2025,7 @@ prior            = args.prior
 breast_type      = args.orientation
 beta             = args.beta
 delta            = args.delta
+neighbours       = int(args.neighbours)
 lambda_parameter = float(args.lambdavalue)
 
 beta_array  = [float(x) for x in beta.split(",")]
@@ -2122,7 +2124,7 @@ for delta in delta_array:
                 d_prior       = np.zeros(f_size, np.float32)
                 d_prior       = cuda.to_device(d_prior)
 
-                prior_GPU_SART(d_prior, d_est, delta, prior_type)
+                prior_GPU_SART(d_prior, d_est, delta, prior_type, neighbours)
 
                 fprojectCB_1R_GPU_SART_cos(
                     d_est,
