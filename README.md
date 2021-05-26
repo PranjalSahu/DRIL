@@ -12,12 +12,13 @@ ___________________________________
 ___________________________________
 **recon-script.py**
 ___________________________________
-For performing the reconstruction.<br>
-Takes as argument the folder of input projections (--input) and the path to save the denoised projections (--output).<br>
-orientation = left or right<br> 
-neighbours  = Number of neighbours on one side to consider while calculating the prior.<br>
-prior       = huber or quadratic or anisotropic_quadratic<br>
-Other arguments are self explnatory.<br>
+Arguments to the script<br>
+--input       = Path of input projections<br>.
+--output      = path to save the reconstructed volume<br>.
+--orientation = left or right<br> 
+--neighbours  = Number of neighbours on one side to consider while calculating the prior<br>.
+--prior       = huber or quadratic or anisotropic_quadratic<br><br>
+For changing the geometry please edit the script as we do in previous reconstruction code. It will require calculation using the excel script.
 <br>
 **Sample Usage:**<br>
 python recon-script.py --input=/media/drilnvm/ubuntudata2/REAL-DBT-PROJECTIONS/MASS/MC-20/LE-R-CC/ --output=/media/drilnvm/ubuntudata2/IMPI_recons/ --orientation=left --prior=anisotropic_quadratic --name=test2 --beta=0.5,0.8 --delta=0.0006 --lambdavalue=0.9 --neighbours=1
