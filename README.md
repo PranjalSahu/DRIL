@@ -5,8 +5,8 @@ ___________________________________
 For performing the denoising of dicom projections.<br>
 Arguments to the script<br>
 **--input**=Path of input projections.<br>
-**--output**=path to save the denoised projections.<br>
-**--weight**=ppath of model weights.<br>
+**--output**=Path to save the denoised projections.<br>
+**--weight**=Path of model weights.<br>
 <br>
 **Sample Usage:**<br>
 python denoise_projection-script-only.py --input=/media/pranjal/newdrive1/REAL-DBT-PROJECTIONS/Pranjal-PMA-DATA/04140608/LE-L-CC/ --output=/media/pranjal/newdrive1/REAL-DBT-PROJECTIONS/Pranjal-PMA-DATA/04140608/LE-L-CC-CLEAN-TEMP1/ --weight=/media/pranjal/newdrive1/DBT-PROJ-DENOISE/normal-to-three-0.99-weights/generator_weights_3550.h5
@@ -17,7 +17,7 @@ ___________________________________
 For performing reconstruction of the projections.<br>
 Arguments to the script<br>
 **--input**=Path of input projections.<br>
-**--output**=path to save the reconstructed volume.<br>
+**--output**=Path to save the reconstructed volume.<br>
 **--orientation**=left or right<br> 
 **--neighbours**=Number of neighbours on one side to consider while calculating the prior.<br>
 **--prior**=huber or quadratic or anisotropic_quadratic<br>
