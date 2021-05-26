@@ -1,7 +1,7 @@
 # DRIL
 ___________________________________
 **freeze_conda.yml**<br>
-For creating the conda enviroment.<br>
+For creating the conda enviroment.<br><br>
 **Usage command:**<br>
 conda env create -f freeze_conda.yml<br><br>
 This will create environment named drilenv.<br>
