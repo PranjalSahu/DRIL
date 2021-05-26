@@ -20,6 +20,6 @@ Arguments to the script<br>
 --prior       = huber or quadratic or anisotropic_quadratic<br>
 --name        = name of the volume for storing<br><br>
 Other arugments are --beta, --delta, --lambdavalue. For changing the geometry please edit the script as we do in previous reconstruction code. It will require calculation using the excel script.
-<br>
+<br><br>
 **Sample Usage:**<br>
 python recon-script.py --input=/media/drilnvm/ubuntudata2/REAL-DBT-PROJECTIONS/MASS/MC-20/LE-R-CC/ --output=/media/drilnvm/ubuntudata2/IMPI_recons/ --orientation=left --prior=anisotropic_quadratic --name=test2 --beta=0.5,0.8 --delta=0.0006 --lambdavalue=0.9 --neighbours=1
