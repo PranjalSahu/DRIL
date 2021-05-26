@@ -14,6 +14,9 @@ ___________________________________
 ___________________________________
 For performing the reconstruction.<br>
 Takes as argument the folder of input projections (--input) and the path to save the denoised projections (--output).<br>
+orientation = left or right<br> 
+neighbours  = Number of neighbours on one side to consider while calculating the prior.<br>
+prior       = huber or quadratic or anisotropic_quadratic<br>
 Other arguments are self explnatory.<br>
 <br>
 **Sample Usage:**<br>
