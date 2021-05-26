@@ -13,11 +13,13 @@ ___________________________________
 **recon-script.py**
 ___________________________________
 Arguments to the script<br>
---input       = Path of input projections<br>.
---output      = path to save the reconstructed volume<br>.
+--input       = Path of input projections.<br>
+--output      = path to save the reconstructed volume.<br>
 --orientation = left or right<br> 
---neighbours  = Number of neighbours on one side to consider while calculating the prior<br>.
+--neighbours  = Number of neighbours on one side to consider while calculating the prior.<br>
 --prior       = huber or quadratic or anisotropic_quadratic<br><br>
+--name        = name of the volume for storing<br>
+Other arugments are --beta, --delta, --lambdavalue
 For changing the geometry please edit the script as we do in previous reconstruction code. It will require calculation using the excel script.
 <br>
 **Sample Usage:**<br>
