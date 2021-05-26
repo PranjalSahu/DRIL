@@ -7,6 +7,7 @@ This will create environment named drilenv.<br>
 Activate the environment using command conda activate drilenv.<br><br>
 
 Inside the enviroment please install the few other packages using the pip command.<br>
+These packages are listed in the the freeze_conda.yml file at the end.<br>
 For example, <br>
 **pip install astra-toolbox==1.9.9.dev**<br>
 **pip install dival==0.5.7** etc.
