@@ -1,5 +1,15 @@
 # DRIL
 ___________________________________
+**freeze_conda.yml**<br>
+For creating the conda enviroment.
+Usage command: conda env create -f freeze_conda.yml
+This will create environment named drilenv.
+Please install the few other packages using the pip command.<br>
+For example, **pip install astra-toolbox==1.9.9.dev**<br>
+**pip install dival==0.5.7** etc.
+___________________________________
+
+___________________________________
 **denoise_projection-script-only.py**<br>
 For performing the denoising of dicom projections.
 ___________________________________
