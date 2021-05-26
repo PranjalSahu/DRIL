@@ -15,8 +15,7 @@ ___________________________________
 
 ___________________________________
 **denoise_projection-script-only.py**<br>
-For performing the denoising of dicom projections.
-___________________________________
+For performing the denoising of dicom projections.<br><br>
 
 Arguments to the script<br>
 **--input**=Path of input projections.<br>
@@ -28,8 +27,8 @@ python denoise_projection-script-only.py --input=/media/pranjal/newdrive1/REAL-D
 ___________________________________
 ___________________________________
 **recon-script.py**<br>
-For performing reconstruction of the projections.
-___________________________________
+For performing reconstruction of the projections.<br><br>
+
 Arguments to the script<br>
 **--input**=Path of input projections.<br>
 **--output**=Path to save the reconstructed volume.<br>
