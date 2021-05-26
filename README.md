@@ -2,7 +2,8 @@
 ___________________________________
 **freeze_conda.yml**<br>
 For creating the conda enviroment.<br>
-Usage command: conda env create -f freeze_conda.yml
+**Usage command:**<br>
+conda env create -f freeze_conda.yml<br><br>
 This will create environment named drilenv.<br>
 Activate the environment using command conda activate drilenv.<br><br>
 
